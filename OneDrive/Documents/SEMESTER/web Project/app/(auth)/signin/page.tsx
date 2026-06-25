@@ -15,7 +15,6 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [debugError, setDebugError] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,20 +25,12 @@ export default function SignInPage() {
     }
 
     startTransition(async () => {
-      try {
-        const result = await signInAction(email, password);
-        const raw = JSON.stringify(result);
-        setDebugError("RAW RESULT: " + raw);
-        if (result.error) {
-          toast.error(result.error);
-        } else {
-          toast.success(result.success ?? "Signed in successfully!");
-          window.location.href = "/";
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : JSON.stringify(err);
-        setDebugError("THROWN: " + msg);
-        toast.error("Unexpected error: " + msg);
+      const result = await signInAction(email, password);
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(result.success ?? "Signed in successfully!");
+        window.location.href = "/";
       }
     });
   };
@@ -71,7 +62,6 @@ export default function SignInPage() {
           </Link>
         </div>
 
-        {debugError && <pre className="bg-red-100 text-red-800 text-xs p-3 rounded mb-4 whitespace-pre-wrap break-all">{debugError}</pre>}
         <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-1">
           Welcome Back
         </h2>

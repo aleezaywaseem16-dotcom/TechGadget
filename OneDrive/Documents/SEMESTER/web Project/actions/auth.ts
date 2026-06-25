@@ -31,12 +31,9 @@ export async function signUpAction(data: {
   email: string;
   password: string;
 }): Promise<AuthResult> {
-  let step = "init";
   try {
-    step = "createClient";
     const supabase = await createClient();
 
-    step = "signUp";
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -47,14 +44,21 @@ export async function signUpAction(data: {
       },
     });
 
-    step = "checkError";
-    if (error) return { error: `[${step}] ${error.message || JSON.stringify(error) || "Sign up failed"}` };
+    if (error) {
+      const msg = error.message
+        || (error as unknown as Record<string, string>).code
+        || (error.status ? `Error ${error.status}` : null)
+        || "Sign up failed — this email may already be registered. Try signing in instead.";
+      return { error: msg };
+    }
 
-    step = "done";
-    return { success: `Account created! User: ${authData?.user?.id ?? "none"}` };
+    if (!authData?.user) {
+      return { error: "This email is already registered. Please sign in instead." };
+    }
+
+    return { success: "Account created! You can now sign in." };
   } catch (e) {
-    const msg = e instanceof Error ? e.message : JSON.stringify(e);
-    return { error: `[failed at: ${step}] ${msg}` };
+    return { error: e instanceof Error ? e.message : "Unexpected error during sign up." };
   }
 }
 
