@@ -91,9 +91,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div className="container mx-auto px-4 py-6">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-5">
         <h1 className="text-3xl font-bold mb-1">
           {params.q ? `Search: "${params.q}"` : params.featured === "true" ? "Featured Deals" : "All Products"}
         </h1>
@@ -115,7 +115,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
         <div className="flex-1 min-w-0">
           {/* Sort bar */}
-          <div className="flex items-center justify-between gap-4 mb-6">
+          <div className="flex items-center justify-between gap-4 mb-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <SlidersHorizontal className="w-4 h-4" />
               <span className="hidden sm:inline">Sort by:</span>

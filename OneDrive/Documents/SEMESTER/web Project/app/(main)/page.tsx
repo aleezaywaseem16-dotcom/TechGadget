@@ -61,7 +61,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(14,165,233,0.08)_0%,transparent_60%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-        <div className="container mx-auto px-4 py-24 md:py-36 relative">
+        <div className="container mx-auto px-4 py-14 md:py-22 relative">
           <FadeIn direction="up" delay={0}>
             <div className="inline-flex items-center gap-2 bg-sky-500/15 border border-sky-400/25 rounded-full px-4 py-1.5 text-sky-300 text-sm mb-6">
               <Zap className="w-3.5 h-3.5" />
@@ -118,9 +118,9 @@ export default async function HomePage() {
       </section>
 
       {/* ── Categories ───────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-12">
         <FadeIn>
-          <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-3xl font-bold">Shop by Category</h2>
               <p className="text-muted-foreground mt-1">Find exactly what you&apos;re looking for</p>
@@ -151,9 +151,9 @@ export default async function HomePage() {
       {/* ── Featured Products ─────────────────────────────────────── */}
       {featured.length > 0 && (
         <section className="border-t bg-muted/20">
-          <div className="container mx-auto px-4 py-20">
+          <div className="container mx-auto px-4 py-12">
             <FadeIn>
-              <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-3xl font-bold">Featured Deals</h2>
                   <p className="text-muted-foreground mt-1">Handpicked products at the best prices</p>
@@ -176,9 +176,9 @@ export default async function HomePage() {
 
       {/* ── New Arrivals ──────────────────────────────────────────── */}
       {newArrivals.length > 0 && (
-        <section className="container mx-auto px-4 py-20">
+        <section className="container mx-auto px-4 py-12">
           <FadeIn>
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-3xl font-bold">New Arrivals</h2>
                 <p className="text-muted-foreground mt-1">The latest tech just landed</p>
@@ -200,7 +200,7 @@ export default async function HomePage() {
 
       {/* ── Bottom CTA ───────────────────────────────────────────── */}
       <section className="bg-gradient-to-r from-blue-900 via-blue-950 to-slate-950 text-white">
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto px-4 py-12 text-center">
           <FadeIn>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to upgrade your tech?
