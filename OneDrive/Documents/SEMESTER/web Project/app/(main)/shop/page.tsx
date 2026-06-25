@@ -92,11 +92,6 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      {productsError && (
-        <pre className="bg-red-100 text-red-800 text-xs p-4 rounded mb-4 overflow-auto">
-          {JSON.stringify(productsError, null, 2)}
-        </pre>
-      )}
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-3xl font-bold mb-1">
