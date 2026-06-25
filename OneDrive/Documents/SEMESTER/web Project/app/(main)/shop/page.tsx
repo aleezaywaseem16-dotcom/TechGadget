@@ -88,11 +88,15 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   query = query.range(from, from + PAGE_SIZE - 1);
 
   const { data: products, count, error: productsError } = await query;
-  if (productsError) console.error("[shop] Supabase error:", productsError);
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (
     <div className="container mx-auto px-4 py-6">
+      {productsError && (
+        <pre className="bg-red-100 text-red-800 text-xs p-4 rounded mb-4 overflow-auto">
+          {JSON.stringify(productsError, null, 2)}
+        </pre>
+      )}
       {/* Header */}
       <div className="mb-5">
         <h1 className="text-3xl font-bold mb-1">
