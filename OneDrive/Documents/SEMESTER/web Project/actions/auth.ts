@@ -12,13 +12,17 @@ export async function signInAction(
   email: string,
   password: string
 ): Promise<AuthResult> {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message || JSON.stringify(error) || "Sign in failed" };
 
-  revalidatePath("/", "layout");
-  return { success: "Welcome back! Redirecting…" };
+    revalidatePath("/", "layout");
+    return { success: "Welcome back! Redirecting…" };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : JSON.stringify(e) };
+  }
 }
 
 export async function signUpAction(data: {
