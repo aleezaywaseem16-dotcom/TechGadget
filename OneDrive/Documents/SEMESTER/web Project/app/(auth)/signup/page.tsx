@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [debugError, setDebugError] = useState<string>("");
 
   const [form, setForm] = useState({
     firstName: "",
@@ -54,17 +55,24 @@ export default function SignUpPage() {
     }
 
     startTransition(async () => {
-      const result = await signUpAction({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        password: form.password,
-      });
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.success ?? "Account created! Check your email to verify.");
-        window.location.href = "/signin";
+      try {
+        const result = await signUpAction({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          password: form.password,
+        });
+        setDebugError("RAW RESULT: " + JSON.stringify(result));
+        if (result.error) {
+          toast.error(result.error);
+        } else {
+          toast.success(result.success ?? "Account created!");
+          window.location.href = "/signin";
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : JSON.stringify(err);
+        setDebugError("THROWN: " + msg);
+        toast.error("Unexpected: " + msg);
       }
     });
   };
@@ -95,6 +103,7 @@ export default function SignUpPage() {
           </Link>
         </div>
 
+        {debugError && <pre className="bg-red-100 text-red-800 text-xs p-3 rounded mb-4 whitespace-pre-wrap break-all">{debugError}</pre>}
         <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-1">
           Create Account
         </h2>

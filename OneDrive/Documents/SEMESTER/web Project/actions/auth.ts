@@ -31,24 +31,25 @@ export async function signUpAction(data: {
   email: string;
   password: string;
 }): Promise<AuthResult> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
-    options: {
-      data: {
-        full_name: `${data.firstName} ${data.lastName}`.trim(),
+    const { error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          full_name: `${data.firstName} ${data.lastName}`.trim(),
+        },
       },
-    },
-  });
+    });
 
-  if (error) return { error: error.message };
+    if (error) return { error: error.message || JSON.stringify(error) || "Sign up failed" };
 
-  return {
-    success:
-      "Account created! Check your email to verify, then sign in.",
-  };
+    return { success: "Account created! You can now sign in." };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : JSON.stringify(e) };
+  }
 }
 
 export async function resetPasswordAction(
