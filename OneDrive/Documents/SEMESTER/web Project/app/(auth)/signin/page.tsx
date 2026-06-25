@@ -8,7 +8,6 @@ import { Eye, EyeOff, Zap, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signInAction } from "@/actions/auth";
 
 export default function SignInPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,19 +24,29 @@ export default function SignInPage() {
     }
 
     startTransition(async () => {
-      const result = await signInAction(email, password);
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.success ?? "Signed in successfully!");
-        window.location.href = "/";
+      try {
+        const res = await fetch("/api/auth/signin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          toast.error(data.error || "Invalid email or password.");
+        } else {
+          toast.success(data.success ?? "Signed in successfully!");
+          window.location.href = "/";
+        }
+      } catch {
+        toast.error("Network error. Please check your connection and try again.");
       }
     });
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
-      {/* Background image — migrated from original signin.avif */}
       <Image
         src="/images/signin.avif"
         alt=""
@@ -45,12 +54,9 @@ export default function SignInPage() {
         className="object-cover object-center"
         priority
       />
-      {/* Dark overlay — matches original rgba(0,0,0,0.45) */}
       <div className="absolute inset-0 bg-black/45" />
 
-      {/* Glass card */}
       <div className="relative z-10 w-full max-w-[480px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-10">
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -87,10 +93,7 @@ export default function SignInPage() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link
-                href="/reset-password"
-                className="text-xs text-primary hover:underline"
-              >
+              <Link href="/reset-password" className="text-xs text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -136,10 +139,7 @@ export default function SignInPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-primary font-semibold hover:underline"
-          >
+          <Link href="/signup" className="text-primary font-semibold hover:underline">
             Sign Up
           </Link>
         </p>

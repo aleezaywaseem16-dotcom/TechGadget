@@ -8,7 +8,6 @@ import { Eye, EyeOff, Zap, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUpAction } from "@/actions/auth";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -54,24 +53,34 @@ export default function SignUpPage() {
     }
 
     startTransition(async () => {
-      const result = await signUpAction({
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        password: form.password,
-      });
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(result.success ?? "Account created!");
-        window.location.href = "/signin";
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            password: form.password,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          toast.error(data.error || "Sign up failed. Please try again.");
+        } else {
+          toast.success(data.success ?? "Account created!");
+          window.location.href = "/signin";
+        }
+      } catch {
+        toast.error("Network error. Please check your connection and try again.");
       }
     });
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
-      {/* Background — migrated from original signup.avif */}
       <Image
         src="/images/signup.avif"
         alt=""
@@ -81,9 +90,7 @@ export default function SignUpPage() {
       />
       <div className="absolute inset-0 bg-black/45" />
 
-      {/* Glass card */}
       <div className="relative z-10 w-full max-w-[480px] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl p-10">
-        {/* Logo */}
         <div className="flex justify-center mb-6">
           <Link href="/" className="inline-flex items-center gap-2 font-bold text-xl">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -103,7 +110,6 @@ export default function SignUpPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label htmlFor="firstName">First Name</Label>
@@ -170,7 +176,6 @@ export default function SignUpPage() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            {/* Password strength indicator */}
             {form.password && (
               <div className="flex gap-1 mt-1">
                 {[1, 2, 3, 4].map((n) => (
@@ -240,10 +245,7 @@ export default function SignUpPage() {
 
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Already have an account?{" "}
-          <Link
-            href="/signin"
-            className="text-primary font-semibold hover:underline"
-          >
+          <Link href="/signin" className="text-primary font-semibold hover:underline">
             Login
           </Link>
         </p>

@@ -13,9 +13,7 @@ export async function proxy(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
@@ -25,14 +23,14 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refresh session — MUST be called before any route protection
+  // Refresh session — must be called before any route protection
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
 
-  // Redirect unauthenticated users away from protected routes
+  // Protected routes — require authentication
   const isProtected =
     path.startsWith("/account") ||
     path.startsWith("/checkout") ||
@@ -60,22 +58,14 @@ export async function proxy(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    if (
-      !profile ||
-      profile.role !== "admin" ||
-      profile.is_disabled
-    ) {
+    if (!profile || profile.role !== "admin" || profile.is_disabled) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
-  // Redirect authenticated users away from auth pages
-  if (
-    user &&
-    (path === "/signin" || path === "/signup")
-  ) {
-    const redirectTo =
-      request.nextUrl.searchParams.get("redirectTo") ?? "/";
+  // Redirect already-authenticated users away from auth pages
+  if (user && (path === "/signin" || path === "/signup")) {
+    const redirectTo = request.nextUrl.searchParams.get("redirectTo") ?? "/";
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
 
@@ -83,5 +73,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|public/).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|public/|api/).*)",
+  ],
 };

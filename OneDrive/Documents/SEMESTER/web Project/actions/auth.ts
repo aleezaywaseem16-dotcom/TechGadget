@@ -3,78 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createDirectClient } from "@supabase/supabase-js";
 
 export type AuthResult =
   | { error: string; success?: never }
   | { success: string; error?: never };
 
-export async function signInAction(
-  email: string,
-  password: string
-): Promise<AuthResult> {
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) return { error: error.message || JSON.stringify(error) || "Sign in failed" };
-
-    revalidatePath("/", "layout");
-    return { success: "Welcome back! Redirecting…" };
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : JSON.stringify(e) };
-  }
-}
-
-export async function signUpAction(data: {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}): Promise<AuthResult> {
-  try {
-    // Use direct client (no cookie management) for signup — avoids SSR cookie issues
-    const supabase = createDirectClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-
-    const { data: authData, error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          full_name: `${data.firstName} ${data.lastName}`.trim(),
-        },
-      },
-    });
-
-    if (error) {
-      const raw = error as unknown as Record<string, unknown>;
-      const msg = error.message
-        || String(raw.code ?? "")
-        || (error.status ? `Auth error ${error.status}` : "")
-        || "Sign up failed. Please try again.";
-      return { error: msg };
-    }
-
-    if (!authData?.user) {
-      return { error: "This email is already registered. Please sign in instead." };
-    }
-
-    return { success: "Account created! You can now sign in." };
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return { error: msg || "Unexpected error during sign up." };
-  }
-}
-
-export async function resetPasswordAction(
-  email: string
-): Promise<AuthResult> {
+export async function resetPasswordAction(email: string): Promise<AuthResult> {
   const supabase = await createClient();
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${siteUrl}/account/settings?tab=password`,
@@ -119,7 +55,6 @@ export async function updatePasswordAction(data: {
 }): Promise<AuthResult> {
   const supabase = await createClient();
 
-  // Verify current password by signing in
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -131,9 +66,7 @@ export async function updatePasswordAction(data: {
   });
   if (verifyError) return { error: "Current password is incorrect." };
 
-  const { error } = await supabase.auth.updateUser({
-    password: data.newPassword,
-  });
+  const { error } = await supabase.auth.updateUser({ password: data.newPassword });
   if (error) return { error: error.message };
 
   return { success: "Password updated successfully!" };
