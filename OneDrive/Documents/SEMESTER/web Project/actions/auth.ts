@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createDirectClient } from "@supabase/supabase-js";
 
 export type AuthResult =
   | { error: string; success?: never }
@@ -32,7 +33,11 @@ export async function signUpAction(data: {
   password: string;
 }): Promise<AuthResult> {
   try {
-    const supabase = await createClient();
+    // Use direct client (no cookie management) for signup — avoids SSR cookie issues
+    const supabase = createDirectClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
@@ -45,10 +50,11 @@ export async function signUpAction(data: {
     });
 
     if (error) {
+      const raw = error as unknown as Record<string, unknown>;
       const msg = error.message
-        || (error as unknown as Record<string, string>).code
-        || (error.status ? `Error ${error.status}` : null)
-        || "Sign up failed — this email may already be registered. Try signing in instead.";
+        || String(raw.code ?? "")
+        || (error.status ? `Auth error ${error.status}` : "")
+        || "Sign up failed. Please try again.";
       return { error: msg };
     }
 
@@ -58,7 +64,8 @@ export async function signUpAction(data: {
 
     return { success: "Account created! You can now sign in." };
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "Unexpected error during sign up." };
+    const msg = e instanceof Error ? e.message : String(e);
+    return { error: msg || "Unexpected error during sign up." };
   }
 }
 
