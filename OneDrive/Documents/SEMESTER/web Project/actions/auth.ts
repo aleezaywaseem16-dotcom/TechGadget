@@ -31,10 +31,13 @@ export async function signUpAction(data: {
   email: string;
   password: string;
 }): Promise<AuthResult> {
+  let step = "init";
   try {
+    step = "createClient";
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signUp({
+    step = "signUp";
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -44,11 +47,14 @@ export async function signUpAction(data: {
       },
     });
 
-    if (error) return { error: error.message || JSON.stringify(error) || "Sign up failed" };
+    step = "checkError";
+    if (error) return { error: `[${step}] ${error.message || JSON.stringify(error) || "Sign up failed"}` };
 
-    return { success: "Account created! You can now sign in." };
+    step = "done";
+    return { success: `Account created! User: ${authData?.user?.id ?? "none"}` };
   } catch (e) {
-    return { error: e instanceof Error ? e.message : JSON.stringify(e) };
+    const msg = e instanceof Error ? e.message : JSON.stringify(e);
+    return { error: `[failed at: ${step}] ${msg}` };
   }
 }
 
