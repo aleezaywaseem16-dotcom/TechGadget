@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { ContactForm } from "@/components/contact/ContactForm";
 
-export const metadata: Metadata = { title: "Contact Us" };
+export const metadata: Metadata = { title: "Contact Us | TechGadget" };
 
 const CONTACT_INFO = [
   {
@@ -52,55 +53,7 @@ export default function ContactPage() {
         ))}
       </div>
 
-      <div className="rounded-2xl border bg-card p-8">
-        <h2 className="text-xl font-bold mb-6">Send Us a Message</h2>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Full Name</label>
-              <input
-                type="text"
-                required
-                placeholder="Ahmed Ali"
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                type="email"
-                required
-                placeholder="ahmed@example.com"
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Subject</label>
-            <input
-              type="text"
-              required
-              placeholder="Order inquiry, product question…"
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Message</label>
-            <textarea
-              required
-              rows={5}
-              placeholder="Tell us how we can help…"
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-            />
-          </div>
-          <button
-            type="submit"
-            className="h-11 px-8 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
-          >
-            Send Message
-          </button>
-        </form>
-      </div>
+      <ContactForm />
     </div>
   );
 }

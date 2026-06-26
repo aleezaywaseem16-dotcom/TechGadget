@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Zap, Mail } from "lucide-react";
+import { useState } from "react";
+import { Zap, Mail, Loader2, Check } from "lucide-react";
+import { toast } from "sonner";
+import { subscribeToNewsletterAction } from "@/actions/newsletter";
 
 const SHOP_LINKS = [
   { label: "Smartphones", href: "/shop/smartphones" },
@@ -33,6 +36,24 @@ const SUPPORT_LINKS = [
 ];
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleNewsletter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    const result = await subscribeToNewsletterAction(email);
+    setLoading(false);
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success(result.success!);
+      setSubscribed(true);
+    }
+  };
+
   return (
     <footer className="bg-gray-950 text-gray-300 mt-auto">
       <div className="container mx-auto px-4 py-16">
@@ -49,23 +70,31 @@ export function Footer() {
               Your one-stop destination for premium tech gadgets. Genuine products, best prices, and lightning-fast delivery across Pakistan.
             </p>
             {/* Newsletter */}
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex gap-2 max-w-xs"
-            >
+            <form onSubmit={handleNewsletter} className="flex gap-2 max-w-xs">
               <div className="relative flex-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input
                   type="email"
-                  placeholder="Your email address"
-                  className="w-full pl-9 pr-3 h-10 rounded-lg bg-gray-800 border border-gray-700 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={subscribed || loading}
+                  placeholder={subscribed ? "You're subscribed!" : "Your email address"}
+                  className="w-full pl-9 pr-3 h-10 rounded-lg bg-gray-800 border border-gray-700 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors disabled:opacity-60"
                 />
               </div>
               <button
                 type="submit"
-                className="h-10 px-4 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors flex-shrink-0"
+                disabled={subscribed || loading}
+                className="h-10 px-3 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors flex-shrink-0 disabled:opacity-60 flex items-center justify-center min-w-[80px]"
               >
-                Subscribe
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : subscribed ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  "Subscribe"
+                )}
               </button>
             </form>
             <p className="text-xs text-gray-500 mt-2">

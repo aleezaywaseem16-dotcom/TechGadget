@@ -23,6 +23,24 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "resource.logitech.com" },
       // Bose
       { protocol: "https", hostname: "assets.bose.com" },
+      // OnePlus
+      { protocol: "https", hostname: "oasis.opstatics.com" },
+      // Xiaomi
+      { protocol: "https", hostname: "i01.appmifile.com" },
+      // HP
+      { protocol: "https", hostname: "ssl-product-images.www8-hp.com" },
+      // Lenovo
+      { protocol: "https", hostname: "www.lenovo.com" },
+      // JBL
+      { protocol: "https", hostname: "consumer.jbl.global" },
+      // Garmin
+      { protocol: "https", hostname: "static.garmin.com" },
+      // SteelSeries
+      { protocol: "https", hostname: "media.steelseries.com" },
+      // Anker
+      { protocol: "https", hostname: "dimg.anker.com" },
+      // DJI
+      { protocol: "https", hostname: "store-cdn.dji.com" },
     ],
   },
 };

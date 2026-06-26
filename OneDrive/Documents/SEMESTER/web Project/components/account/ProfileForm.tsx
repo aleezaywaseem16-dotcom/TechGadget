@@ -70,7 +70,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               type="tel"
               value={data.phone}
               onChange={set("phone")}
-              placeholder="+1 (555) 000-0000"
+              placeholder="03XX-XXXXXXX"
               disabled={isPending}
             />
           </div>

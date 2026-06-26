@@ -16,9 +16,16 @@ export default async function AccountLayout({
 
   if (!user) redirect("/signin?redirectTo=/account");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const isAdmin = profile?.role === "admin";
+
   return (
     <>
-      <Navbar />
+      <Navbar user={{ email: user.email ?? "" }} isAdmin={isAdmin} />
       <div className="container mx-auto px-4 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className="w-full lg:w-60 flex-shrink-0">
