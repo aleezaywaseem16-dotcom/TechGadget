@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight, Zap, Shield, Truck, Headphones,
-  Smartphone, Laptop, Gamepad2, Watch, Camera, Monitor, Plug,
+  Smartphone, Laptop, Gamepad2, Watch, Monitor, Plug,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ const CATEGORIES: { name: string; slug: string; Icon: LucideIcon; gradient: stri
   { name: "Gaming",               slug: "gaming",                Icon: Gamepad2,   gradient: "from-green-500 to-emerald-700" },
   { name: "Smart Watches",        slug: "smart-watches",         Icon: Watch,      gradient: "from-rose-500 to-pink-700" },
   { name: "Audio Devices",        slug: "audio-devices",         Icon: Headphones, gradient: "from-amber-500 to-orange-600" },
-  { name: "Cameras",              slug: "cameras",               Icon: Camera,     gradient: "from-teal-500 to-cyan-700" },
   { name: "Computer Accessories", slug: "computer-accessories",  Icon: Monitor,    gradient: "from-violet-500 to-purple-700" },
   { name: "Mobile Accessories",   slug: "mobile-accessories",    Icon: Plug,       gradient: "from-blue-500 to-indigo-700" },
 ];

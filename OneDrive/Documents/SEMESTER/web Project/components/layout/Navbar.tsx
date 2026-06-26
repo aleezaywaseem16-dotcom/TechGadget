@@ -32,7 +32,6 @@ const CATEGORIES = [
   { name: "Gaming", slug: "gaming" },
   { name: "Smart Watches", slug: "smart-watches" },
   { name: "Audio Devices", slug: "audio-devices" },
-  { name: "Cameras", slug: "cameras" },
   { name: "Computer Accessories", slug: "computer-accessories" },
   { name: "Mobile Accessories", slug: "mobile-accessories" },
 ];
