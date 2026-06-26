@@ -141,10 +141,10 @@ export function ProductForm({ categories, brands, product }: ProductFormProps) {
       {/* Images */}
       <div className="rounded-2xl border bg-card p-6 space-y-3">
         <h2 className="font-semibold text-base">Product Images</h2>
-        <p className="text-xs text-muted-foreground">One image URL per line. First URL = main image.</p>
+        <p className="text-xs text-muted-foreground">One Unsplash URL per line. First URL = main image. Use <strong>images.unsplash.com</strong> — manufacturer CDN links are blocked by hotlink protection.</p>
         <Textarea id="image_urls" name="image_urls" rows={5}
           defaultValue={product?.images ? imagesToText(product.images) : ""}
-          placeholder={"https://store.storeimages.cdn-apple.com/...\nhttps://..."} />
+          placeholder={"https://images.unsplash.com/photo-XXXX?w=600&h=600&fit=crop&auto=format\nhttps://images.unsplash.com/photo-XXXX?w=600&h=600&fit=crop&auto=format"} />
       </div>
 
       <div className="flex gap-3 pb-8">
