@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight } from "lucide-react";
 import { useWishlistStore } from "@/store/ui-store";
-import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/product/WishlistButton";
 import { AddToCartButton } from "@/components/product/AddToCartButton";
@@ -35,27 +34,22 @@ export default function WishlistPage() {
   useEffect(() => {
     const ids = Array.from(productIds);
     if (!ids.length) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProducts([]);
       setLoading(false);
       return;
     }
 
-    async function load() {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/products?ids=${ids.join(",")}`);
-        if (res.ok) {
-          const data = await res.json();
-          setProducts(data.products ?? []);
-        }
-      } catch {
-        // API may not exist yet — show empty state gracefully
-      } finally {
-        setLoading(false);
-      }
-    }
+    let cancelled = false;
+    setLoading(true);
 
-    load();
+    fetch(`/api/products?ids=${ids.join(",")}`)
+      .then((res) => res.ok ? res.json() : { products: [] })
+      .then((data) => { if (!cancelled) setProducts(data.products ?? []); })
+      .catch(() => { if (!cancelled) setProducts([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, [productIds]);
 
   if (loading) {

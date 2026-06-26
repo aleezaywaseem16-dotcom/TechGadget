@@ -8,9 +8,8 @@ interface SuccessPageProps {
 
 export default async function CheckoutSuccessPage({ searchParams }: SuccessPageProps) {
   const { order, method } = await searchParams;
-  const isCOD    = method === "cod";
-  const isDemo   = method === "demo";
-  const isStripe = !isCOD && !isDemo;
+  const isCOD  = method === "cod";
+  const isDemo = method === "demo";
 
   return (
     <div className="container mx-auto px-4 py-24 text-center max-w-lg">

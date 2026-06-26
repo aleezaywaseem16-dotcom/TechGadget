@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Package, Truck, CheckCircle, Clock, XCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils";
 
@@ -179,7 +178,7 @@ export default async function OrderDetailPage({ params }: Props) {
           <div className="rounded-2xl border bg-card p-5">
             <p className="text-xs text-muted-foreground">
               Need help with this order?{" "}
-              <Link href="/contact" className="text-primary hover:underline">Contact support</Link>
+              <Link href="/contact" className="text-primary hover:underline">contact support</Link>
             </p>
           </div>
         </div>

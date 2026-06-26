@@ -148,7 +148,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {/* Perks */}
           <div className="space-y-3 py-5 border-t border-b">
             {[
-              { icon: Truck,        label: "Free shipping on orders over $50" },
+              { icon: Truck,        label: "Free shipping on orders over Rs. 5,000" },
               { icon: Package,      label: "Easy 30-day returns" },
               { icon: ShieldCheck,  label: "Genuine product, 1-year warranty" },
             ].map((item) => (

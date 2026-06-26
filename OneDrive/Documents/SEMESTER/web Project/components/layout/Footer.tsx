@@ -19,16 +19,16 @@ const ACCOUNT_LINKS = [
 ];
 
 const COMPANY_LINKS = [
-  { label: "About Us", href: "#" },
-  { label: "Contact", href: "#" },
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 
 const SUPPORT_LINKS = [
-  { label: "FAQ", href: "#" },
-  { label: "Returns & Refunds", href: "#" },
-  { label: "Shipping Info", href: "#" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Returns & Refunds", href: "/returns" },
+  { label: "Shipping Info", href: "/shipping" },
   { label: "Track Order", href: "/account/orders" },
 ];
 

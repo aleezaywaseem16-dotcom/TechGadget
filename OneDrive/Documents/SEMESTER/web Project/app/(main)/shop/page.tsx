@@ -87,7 +87,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const from = (currentPage - 1) * PAGE_SIZE;
   query = query.range(from, from + PAGE_SIZE - 1);
 
-  const { data: products, count, error: productsError } = await query;
+  const { data: products, count } = await query;
   const totalPages = Math.ceil((count ?? 0) / PAGE_SIZE);
 
   return (

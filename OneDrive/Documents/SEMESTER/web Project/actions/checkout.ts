@@ -149,7 +149,7 @@ export async function createStripeSession(data: OrderData) {
     await supabase.from("orders").update({ payment_intent_id: session.id }).eq("id", result.orderId);
 
     return { url: session.url, orderNumber: result.orderNumber };
-  } catch (err) {
+  } catch {
     return { error: "Stripe error. Please use Cash on Delivery instead." };
   }
 }

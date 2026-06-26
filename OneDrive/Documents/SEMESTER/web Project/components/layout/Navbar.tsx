@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   ShoppingBag,
   Heart,
@@ -11,12 +11,20 @@ import {
   Zap,
   Search,
   ChevronDown,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
+import { signOutAction } from "@/actions/auth";
+
+interface NavbarProps {
+  user?: { email: string } | null;
+  isAdmin?: boolean;
+}
 
 const CATEGORIES = [
   { name: "Smartphones", slug: "smartphones" },
@@ -35,12 +43,14 @@ const NAV_LINKS = [
   { label: "Shop", href: "/shop" },
 ];
 
-export function Navbar() {
+export function Navbar({ user, isAdmin }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const totalItems = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) => s.count);
@@ -62,6 +72,12 @@ export function Navbar() {
     if (searchQuery.trim()) {
       window.location.href = `/shop?q=${encodeURIComponent(searchQuery.trim())}`;
     }
+  };
+
+  const handleSignOut = () => {
+    startTransition(async () => {
+      await signOutAction();
+    });
   };
 
   return (
@@ -176,8 +192,58 @@ export function Navbar() {
                 </Button>
               </Link>
 
-              {/* Account */}
-              <Link href="/account">
+              {/* Account — desktop */}
+              {user ? (
+                <div className="relative hidden lg:block" onMouseLeave={() => setUserMenuOpen(false)}>
+                  <button
+                    onMouseEnter={() => setUserMenuOpen(true)}
+                    onClick={() => setUserMenuOpen((o) => !o)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                    aria-label="Account menu"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="max-w-[100px] truncate hidden xl:inline">{user.email.split("@")[0]}</span>
+                    <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", userMenuOpen && "rotate-180")} />
+                  </button>
+                  {userMenuOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-48 bg-card border border-border rounded-xl shadow-xl py-2 z-50">
+                      <p className="px-4 py-1.5 text-xs text-muted-foreground truncate border-b mb-1">{user.email}</p>
+                      <Link href="/account" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors">
+                        <User className="w-4 h-4" /> My Account
+                      </Link>
+                      <Link href="/account/orders" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors">
+                        <ShoppingBag className="w-4 h-4" /> My Orders
+                      </Link>
+                      {isAdmin && (
+                        <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-accent transition-colors">
+                          <LayoutDashboard className="w-4 h-4" /> Admin Panel
+                        </Link>
+                      )}
+                      <div className="border-t mt-1 pt-1">
+                        <button
+                          onClick={handleSignOut}
+                          disabled={isPending}
+                          className="flex items-center gap-2 w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="hidden lg:flex items-center gap-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href="/signin">Sign In</Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              )}
+
+              {/* Mobile account icon */}
+              <Link href={user ? "/account" : "/signin"} className="lg:hidden">
                 <Button variant="ghost" size="icon" aria-label="Account">
                   <User className="w-5 h-5" />
                 </Button>
@@ -257,12 +323,34 @@ export function Navbar() {
             ))}
 
             <div className="mt-auto pt-6 space-y-3">
-              <Button asChild className="w-full" onClick={() => setMobileOpen(false)}>
-                <Link href="/signin">Sign In</Link>
-              </Button>
-              <Button variant="outline" asChild className="w-full" onClick={() => setMobileOpen(false)}>
-                <Link href="/signup">Create Account</Link>
-              </Button>
+              {user ? (
+                <>
+                  <p className="text-xs text-muted-foreground truncate px-1">{user.email}</p>
+                  <Button asChild variant="outline" className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link href="/account">My Account</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link href="/account/orders">My Orders</Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full text-rose-600 border-rose-200 hover:bg-rose-50"
+                    onClick={() => { setMobileOpen(false); handleSignOut(); }}
+                    disabled={isPending}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button asChild className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link href="/signin">Sign In</Link>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link href="/signup">Create Account</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
