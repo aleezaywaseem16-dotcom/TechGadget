@@ -35,7 +35,6 @@ const CATEGORIES = [
   { name: "Cameras", slug: "cameras" },
   { name: "Computer Accessories", slug: "computer-accessories" },
   { name: "Mobile Accessories", slug: "mobile-accessories" },
-  { name: "Smart Home", slug: "smart-home" },
 ];
 
 const NAV_LINKS = [

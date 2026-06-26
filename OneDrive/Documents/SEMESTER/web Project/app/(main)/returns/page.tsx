@@ -34,7 +34,7 @@ export default function ReturnsPage() {
               "Defective or damaged on arrival",
               "Wrong item delivered",
               "Item not as described",
-            ].map((i) => <li key={i} className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">✓</span>{i}</li>)}
+            ].map((i) => <li key={i} className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />{i}</li>)}
           </ul>
         </div>
 
@@ -49,7 +49,7 @@ export default function ReturnsPage() {
               "Products damaged by misuse",
               "Items returned after 7 days",
               "Missing accessories or packaging",
-            ].map((i) => <li key={i} className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span>{i}</li>)}
+            ].map((i) => <li key={i} className="flex items-start gap-2"><XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />{i}</li>)}
           </ul>
         </div>
       </div>

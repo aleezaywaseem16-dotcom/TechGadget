@@ -44,7 +44,7 @@ export default function AboutPage() {
           { value: "50,000+", label: "Happy Customers" },
           { value: "500+",    label: "Products" },
           { value: "30+",     label: "Top Brands" },
-          { value: "4.8★",    label: "Customer Rating" },
+          { value: "4.8/5",   label: "Customer Rating" },
         ].map((stat) => (
           <div key={stat.label} className="rounded-2xl border bg-card p-6 text-center">
             <p className="text-3xl font-bold text-primary mb-1">{stat.value}</p>

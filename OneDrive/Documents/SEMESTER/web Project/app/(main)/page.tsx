@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Zap, Shield, Truck, Headphones } from "lucide-react";
+import {
+  ArrowRight, Zap, Shield, Truck, Headphones,
+  Smartphone, Laptop, Gamepad2, Watch, Camera, Monitor, Plug,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -11,16 +15,15 @@ export const metadata: Metadata = {
   title: "TechGadget — Premium Tech Store Pakistan",
 };
 
-const CATEGORIES = [
-  { name: "Smartphones",          slug: "smartphones",           icon: "📱", gradient: "from-sky-500 to-blue-700" },
-  { name: "Laptops",              slug: "laptops",               icon: "💻", gradient: "from-slate-600 to-slate-900" },
-  { name: "Gaming",               slug: "gaming",                icon: "🎮", gradient: "from-green-500 to-emerald-700" },
-  { name: "Smart Watches",        slug: "smart-watches",         icon: "⌚", gradient: "from-rose-500 to-pink-700" },
-  { name: "Audio Devices",        slug: "audio-devices",         icon: "🎧", gradient: "from-amber-500 to-orange-600" },
-  { name: "Cameras",              slug: "cameras",               icon: "📷", gradient: "from-teal-500 to-cyan-700" },
-  { name: "Computer Accessories", slug: "computer-accessories",  icon: "🖥️", gradient: "from-violet-500 to-purple-700" },
-  { name: "Mobile Accessories",   slug: "mobile-accessories",    icon: "🔌", gradient: "from-blue-500 to-indigo-700" },
-  { name: "Smart Home",           slug: "smart-home",            icon: "🏠", gradient: "from-lime-500 to-green-700" },
+const CATEGORIES: { name: string; slug: string; Icon: LucideIcon; gradient: string }[] = [
+  { name: "Smartphones",          slug: "smartphones",           Icon: Smartphone, gradient: "from-sky-500 to-blue-700" },
+  { name: "Laptops",              slug: "laptops",               Icon: Laptop,     gradient: "from-slate-600 to-slate-900" },
+  { name: "Gaming",               slug: "gaming",                Icon: Gamepad2,   gradient: "from-green-500 to-emerald-700" },
+  { name: "Smart Watches",        slug: "smart-watches",         Icon: Watch,      gradient: "from-rose-500 to-pink-700" },
+  { name: "Audio Devices",        slug: "audio-devices",         Icon: Headphones, gradient: "from-amber-500 to-orange-600" },
+  { name: "Cameras",              slug: "cameras",               Icon: Camera,     gradient: "from-teal-500 to-cyan-700" },
+  { name: "Computer Accessories", slug: "computer-accessories",  Icon: Monitor,    gradient: "from-violet-500 to-purple-700" },
+  { name: "Mobile Accessories",   slug: "mobile-accessories",    Icon: Plug,       gradient: "from-blue-500 to-indigo-700" },
 ];
 
 const FEATURES = [
@@ -138,7 +141,7 @@ export default async function HomePage() {
                 className="group relative rounded-2xl overflow-hidden aspect-square flex flex-col items-center justify-center gap-3 cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-90 group-hover:opacity-100 transition-opacity duration-300`} />
-                <span className="relative z-10 text-4xl drop-shadow">{cat.icon}</span>
+                <cat.Icon className="relative z-10 w-10 h-10 text-white drop-shadow" />
                 <span className="relative z-10 text-white font-semibold text-sm text-center px-3 leading-tight drop-shadow">
                   {cat.name}
                 </span>

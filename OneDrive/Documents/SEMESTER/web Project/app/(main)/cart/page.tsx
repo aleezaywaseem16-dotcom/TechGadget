@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -45,7 +45,7 @@ export default function CartPage() {
       )}
       {freeShippingLeft <= 0 && (
         <div className="mb-6 p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-sm text-emerald-700 dark:text-emerald-300">
-          🎉 You qualify for <strong>free shipping!</strong>
+          <CheckCircle className="inline w-4 h-4 mr-1.5 align-text-bottom" /> You qualify for <strong>free shipping!</strong>
         </div>
       )}
 
