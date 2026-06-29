@@ -40,13 +40,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
   return (
     <>
       <div className="flex flex-col gap-3">
-        {/* Main image — capped height so page doesn't require scrolling */}
-        <div className="relative w-full max-h-[420px] aspect-square bg-muted rounded-2xl overflow-hidden group">
+        {/* Main image */}
+        <div className="relative w-full aspect-[3/4] max-h-[480px] bg-muted rounded-2xl overflow-hidden group">
           <Image
             src={allImages[active].url}
             alt={allImages[active].alt ?? productName}
             fill
-            className="object-contain p-2"
+            className="object-cover"
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
           />
