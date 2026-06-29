@@ -49,6 +49,7 @@ export function Navbar({ user, isAdmin }: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   const totalItems = useCartStore((s) => s.totalItems);
   const wishlistCount = useWishlistStore((s) => s.count);
@@ -219,7 +220,7 @@ export function Navbar({ user, isAdmin }: NavbarProps) {
                       )}
                       <div className="border-t mt-1 pt-1">
                         <button
-                          onClick={handleSignOut}
+                          onClick={() => { setUserMenuOpen(false); setShowSignOutConfirm(true); }}
                           disabled={isPending}
                           className="flex items-center gap-2 w-full px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
                         >
@@ -278,6 +279,39 @@ export function Navbar({ user, isAdmin }: NavbarProps) {
         </div>
       </header>
 
+      {/* Sign-out confirmation modal */}
+      {showSignOutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowSignOutConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-6">
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/40 mx-auto mb-4">
+              <LogOut className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+            </div>
+            <h2 className="text-lg font-semibold text-center mb-1">Sign out?</h2>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Are you sure you want to sign out of your account?
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowSignOutConfirm(false)}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-rose-600 hover:bg-rose-500 text-white"
+                onClick={() => { setShowSignOutConfirm(false); handleSignOut(); }}
+                disabled={isPending}
+              >
+                {isPending ? "Signing out…" : "Sign Out"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile drawer */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex">
@@ -330,10 +364,17 @@ export function Navbar({ user, isAdmin }: NavbarProps) {
                   <Button asChild variant="outline" className="w-full" onClick={() => setMobileOpen(false)}>
                     <Link href="/account/orders">My Orders</Link>
                   </Button>
+                  {isAdmin && (
+                    <Button asChild variant="outline" className="w-full" onClick={() => setMobileOpen(false)}>
+                      <Link href="/admin">
+                        <LayoutDashboard className="w-4 h-4 mr-2" /> Admin Panel
+                      </Link>
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     className="w-full text-rose-600 border-rose-200 hover:bg-rose-50"
-                    onClick={() => { setMobileOpen(false); handleSignOut(); }}
+                    onClick={() => { setMobileOpen(false); setShowSignOutConfirm(true); }}
                     disabled={isPending}
                   >
                     <LogOut className="w-4 h-4 mr-2" /> Sign Out

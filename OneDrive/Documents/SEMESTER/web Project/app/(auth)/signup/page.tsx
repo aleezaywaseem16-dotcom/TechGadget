@@ -43,8 +43,16 @@ export default function SignUpPage() {
       toast.error("Please fill in all fields.");
       return;
     }
-    if (form.password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    if (!/^[A-Za-z\s]{2,30}$/.test(form.firstName.trim())) {
+      toast.error("First name must be 2–30 letters only (no numbers or symbols).");
+      return;
+    }
+    if (!/^[A-Za-z\s]{2,30}$/.test(form.lastName.trim())) {
+      toast.error("Last name must be 2–30 letters only (no numbers or symbols).");
+      return;
+    }
+    if (form.password.length < 8) {
+      toast.error("Password must be at least 8 characters.");
       return;
     }
     if (form.password !== form.confirmPassword) {
@@ -120,6 +128,7 @@ export default function SignUpPage() {
                 value={form.firstName}
                 onChange={set("firstName")}
                 required
+                maxLength={30}
                 disabled={isPending}
                 autoComplete="given-name"
               />
@@ -133,6 +142,7 @@ export default function SignUpPage() {
                 value={form.lastName}
                 onChange={set("lastName")}
                 required
+                maxLength={30}
                 disabled={isPending}
                 autoComplete="family-name"
               />
@@ -148,6 +158,7 @@ export default function SignUpPage() {
               value={form.email}
               onChange={set("email")}
               required
+              maxLength={100}
               disabled={isPending}
               autoComplete="email"
             />

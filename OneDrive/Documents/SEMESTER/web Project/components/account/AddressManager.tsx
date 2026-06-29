@@ -10,6 +10,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Address } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+
+const PROVINCES = ["Punjab","Sindh","Khyber Pakhtunkhwa","Balochistan","Islamabad Capital Territory","Gilgit-Baltistan","Azad Kashmir"];
+
+type AddrErrors = Partial<Record<"label"|"full_name"|"phone"|"line1"|"city"|"state"|"postal_code", string>>;
+
+function validateAddress(f: typeof EMPTY_FORM): AddrErrors {
+  const e: AddrErrors = {};
+  if (!f.label.trim() || f.label.trim().length > 20) e.label = "Label is required and must be under 20 characters.";
+  if (!/^[A-Za-z\s]{2,50}$/.test(f.full_name.trim())) e.full_name = "Full name must be 2–50 letters only.";
+  if (!/^(\+92|0)3[0-9]{2}[-\s]?[0-9]{7}$/.test(f.phone.trim())) e.phone = "Enter a valid Pakistan mobile number (e.g. 0312-3456789).";
+  if (f.line1.trim().length < 5 || f.line1.trim().length > 100) e.line1 = "Street address must be 5–100 characters.";
+  if (!/^[A-Za-z\s]{2,50}$/.test(f.city.trim())) e.city = "City must be 2–50 letters only.";
+  if (!f.state) e.state = "Please select a province.";
+  if (f.postal_code && !/^[0-9]{5}$/.test(f.postal_code)) e.postal_code = "Postal code must be exactly 5 digits.";
+  return e;
+}
 
 interface AddressManagerProps {
   initialAddresses: Address[];
@@ -33,10 +50,13 @@ export function AddressManager({ initialAddresses, userId }: AddressManagerProps
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [addrErrors, setAddrErrors] = useState<AddrErrors>({});
 
   const set = (field: keyof typeof EMPTY_FORM) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
+      setAddrErrors((prev) => ({ ...prev, [field]: undefined }));
+    };
 
   const deleteAddress = async (id: string) => {
     const supabase = createClient();
@@ -57,10 +77,8 @@ export function AddressManager({ initialAddresses, userId }: AddressManagerProps
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.label || !form.full_name || !form.phone || !form.line1 || !form.city || !form.state) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
+    const errs = validateAddress(form);
+    if (Object.keys(errs).length) { setAddrErrors(errs); return; }
     setSaving(true);
     const supabase = createClient();
     const isFirst = addresses.length === 0;
@@ -137,7 +155,7 @@ export function AddressManager({ initialAddresses, userId }: AddressManagerProps
           <CardContent className="pt-5">
             <div className="flex items-center justify-between mb-4">
               <p className="font-semibold">New Address</p>
-              <Button size="icon" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}>
+              <Button size="icon" variant="ghost" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setAddrErrors({}); }}>
                 <X className="w-4 h-4" />
               </Button>
             </div>
@@ -145,50 +163,84 @@ export function AddressManager({ initialAddresses, userId }: AddressManagerProps
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Label <span className="text-destructive">*</span></Label>
-                  <Input placeholder="Home / Office / Other" value={form.label} onChange={set("label")} disabled={saving} />
+                  <Input placeholder="Home / Office / Other" value={form.label} maxLength={20}
+                    onChange={set("label")} disabled={saving}
+                    className={cn(addrErrors.label && "border-destructive focus-visible:ring-destructive")} />
+                  {addrErrors.label && <p className="text-xs text-destructive">{addrErrors.label}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Full Name <span className="text-destructive">*</span></Label>
-                  <Input placeholder="Recipient name" value={form.full_name} onChange={set("full_name")} disabled={saving} />
+                  <Input placeholder="Recipient name" value={form.full_name} maxLength={50}
+                    onChange={set("full_name")} disabled={saving}
+                    className={cn(addrErrors.full_name && "border-destructive focus-visible:ring-destructive")} />
+                  {addrErrors.full_name && <p className="text-xs text-destructive">{addrErrors.full_name}</p>}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Phone <span className="text-destructive">*</span></Label>
-                <Input type="tel" placeholder="03XX-XXXXXXX" value={form.phone} onChange={set("phone")} disabled={saving} />
+                <Label>Phone <span className="text-destructive">*</span> <span className="text-muted-foreground font-normal">(Pakistan)</span></Label>
+                <Input type="tel" placeholder="0312-3456789 or +923123456789" value={form.phone} maxLength={16}
+                  onChange={set("phone")} disabled={saving}
+                  className={cn(addrErrors.phone && "border-destructive focus-visible:ring-destructive")} />
+                {addrErrors.phone
+                  ? <p className="text-xs text-destructive">{addrErrors.phone}</p>
+                  : <p className="text-xs text-muted-foreground">Format: 03XX-XXXXXXX or +923XXXXXXXXX</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Address Line 1 <span className="text-destructive">*</span></Label>
-                <Input placeholder="Street address, house/flat no." value={form.line1} onChange={set("line1")} disabled={saving} />
+                <Input placeholder="Street address, house/flat no." value={form.line1} maxLength={100}
+                  onChange={set("line1")} disabled={saving}
+                  className={cn(addrErrors.line1 && "border-destructive focus-visible:ring-destructive")} />
+                {addrErrors.line1 && <p className="text-xs text-destructive">{addrErrors.line1}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Address Line 2</Label>
-                <Input placeholder="Sector, block, landmark (optional)" value={form.line2} onChange={set("line2")} disabled={saving} />
+                <Input placeholder="Sector, block, landmark (optional)" value={form.line2} maxLength={100}
+                  onChange={set("line2")} disabled={saving} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>City <span className="text-destructive">*</span></Label>
-                  <Input placeholder="Karachi, Lahore, Islamabad…" value={form.city} onChange={set("city")} disabled={saving} />
+                  <Input placeholder="e.g. Karachi" value={form.city} maxLength={50}
+                    onChange={set("city")} disabled={saving}
+                    className={cn(addrErrors.city && "border-destructive focus-visible:ring-destructive")} />
+                  {addrErrors.city && <p className="text-xs text-destructive">{addrErrors.city}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Province <span className="text-destructive">*</span></Label>
-                  <Input placeholder="Punjab, Sindh, KPK…" value={form.state} onChange={set("state")} disabled={saving} />
+                  <select value={form.state}
+                    onChange={set("state")} disabled={saving}
+                    className={cn(
+                      "w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                      addrErrors.state ? "border-destructive focus:ring-destructive" : "border-input"
+                    )}>
+                    <option value="">Select province…</option>
+                    {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  {addrErrors.state && <p className="text-xs text-destructive">{addrErrors.state}</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>Postal Code</Label>
-                  <Input placeholder="e.g. 44000" value={form.postal_code} onChange={set("postal_code")} disabled={saving} />
+                  <Label>Postal Code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                  <Input placeholder="e.g. 44000" value={form.postal_code} maxLength={5}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 5);
+                      setForm((prev) => ({ ...prev, postal_code: val }));
+                      setAddrErrors((prev) => ({ ...prev, postal_code: undefined }));
+                    }} disabled={saving}
+                    className={cn(addrErrors.postal_code && "border-destructive focus-visible:ring-destructive")} />
+                  {addrErrors.postal_code && <p className="text-xs text-destructive">{addrErrors.postal_code}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label>Country</Label>
-                  <Input value={form.country} onChange={set("country")} disabled={saving} />
+                  <Input value={form.country} disabled className="bg-muted/50 cursor-not-allowed" />
                 </div>
               </div>
               <div className="flex gap-3 pt-1">
                 <Button type="submit" disabled={saving}>
                   {saving ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Saving…</> : "Save Address"}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }} disabled={saving}>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setAddrErrors({}); }} disabled={saving}>
                   Cancel
                 </Button>
               </div>

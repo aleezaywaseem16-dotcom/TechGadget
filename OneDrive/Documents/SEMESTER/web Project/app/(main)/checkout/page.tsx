@@ -18,6 +18,52 @@ import { cn } from "@/lib/utils";
 type Step = "shipping" | "payment" | "review";
 type PaymentMethod = "cod" | "demo" | "stripe";
 
+// ── Validation rules ──────────────────────────────────────────────────────────
+const RULES = {
+  fullName: {
+    re: /^[A-Za-z\s]{2,50}$/,
+    msg: "Full name must be 2–50 letters (no numbers or symbols).",
+  },
+  email: {
+    re: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
+    msg: "Enter a valid email address (e.g. user@example.com).",
+  },
+  // Pakistan: 03XX-XXXXXXX | 03XXXXXXXXX | +923XXXXXXXXX | +92-3XX-XXXXXXX
+  phone: {
+    re: /^(\+92|0)3[0-9]{2}[-\s]?[0-9]{7}$/,
+    msg: "Enter a valid Pakistan mobile number (e.g. 0312-3456789 or +923123456789).",
+  },
+  line1: {
+    re: /^.{5,100}$/,
+    msg: "Street address must be 5–100 characters.",
+  },
+  city: {
+    re: /^[A-Za-z\s]{2,50}$/,
+    msg: "City must be 2–50 letters (no numbers or symbols).",
+  },
+  postalCode: {
+    re: /^[0-9]{5}$/,
+    msg: "Postal code must be exactly 5 digits.",
+  },
+} as const;
+
+type FieldKey = keyof typeof RULES;
+type ShippingErrors = Partial<Record<FieldKey | "state", string>>;
+
+function validateShipping(d: {
+  fullName: string; email: string; phone: string;
+  line1: string; city: string; postalCode: string; state: string;
+}): ShippingErrors {
+  const errs: ShippingErrors = {};
+  (Object.keys(RULES) as FieldKey[]).forEach((key) => {
+    const val = d[key as keyof typeof d] ?? "";
+    if (key === "postalCode" && !val) return; // optional
+    if (!RULES[key].re.test(val)) errs[key] = RULES[key].msg;
+  });
+  if (!d.state) errs.state = "Please select a province.";
+  return errs;
+}
+
 const STEPS: { id: Step; label: string }[] = [
   { id: "shipping", label: "Shipping" },
   { id: "payment",  label: "Payment"  },
@@ -73,6 +119,7 @@ export default function CheckoutPage() {
     fullName: "", email: "", phone: "",
     line1: "", line2: "", city: "", state: "", postalCode: "", country: "Pakistan",
   });
+  const [fieldErrors, setFieldErrors] = useState<ShippingErrors>({});
 
   const shippingFee = totalPrice >= SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
   const tax         = Math.round(totalPrice * TAX_RATE);
@@ -165,54 +212,131 @@ export default function CheckoutPage() {
 
           {/* Step 1: Shipping */}
           {step === "shipping" && (
-            <form onSubmit={(e) => { e.preventDefault(); setStep("payment"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const errs = validateShipping(shipping_data);
+                if (Object.keys(errs).length) { setFieldErrors(errs); return; }
+                setFieldErrors({});
+                setStep("payment");
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="space-y-4"
+            >
               <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label htmlFor="fullName">Full Name *</Label>
-                  <Input id="fullName" required value={shipping_data.fullName}
-                    onChange={(e) => setShippingData((d) => ({ ...d, fullName: e.target.value }))} />
+                  <Input
+                    id="fullName" required maxLength={50}
+                    placeholder="e.g. Ali Hassan"
+                    value={shipping_data.fullName}
+                    className={cn(fieldErrors.fullName && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, fullName: e.target.value }));
+                      if (fieldErrors.fullName) setFieldErrors((f) => ({ ...f, fullName: undefined }));
+                    }}
+                  />
+                  {fieldErrors.fullName && <p className="text-xs text-destructive">{fieldErrors.fullName}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="email">Email *</Label>
-                  <Input id="email" type="email" required value={shipping_data.email}
-                    onChange={(e) => setShippingData((d) => ({ ...d, email: e.target.value }))} />
+                  <Input
+                    id="email" type="email" required maxLength={100}
+                    placeholder="e.g. ali@example.com"
+                    value={shipping_data.email}
+                    className={cn(fieldErrors.email && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, email: e.target.value }));
+                      if (fieldErrors.email) setFieldErrors((f) => ({ ...f, email: undefined }));
+                    }}
+                  />
+                  {fieldErrors.email && <p className="text-xs text-destructive">{fieldErrors.email}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="phone">Phone *</Label>
-                  <Input id="phone" type="tel" required placeholder="03XX-XXXXXXX" value={shipping_data.phone}
-                    onChange={(e) => setShippingData((d) => ({ ...d, phone: e.target.value }))} />
+                  <Label htmlFor="phone">Phone * <span className="text-muted-foreground font-normal">(Pakistan)</span></Label>
+                  <Input
+                    id="phone" type="tel" required maxLength={16}
+                    placeholder="0312-3456789 or +923123456789"
+                    value={shipping_data.phone}
+                    className={cn(fieldErrors.phone && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, phone: e.target.value }));
+                      if (fieldErrors.phone) setFieldErrors((f) => ({ ...f, phone: undefined }));
+                    }}
+                  />
+                  {fieldErrors.phone
+                    ? <p className="text-xs text-destructive">{fieldErrors.phone}</p>
+                    : <p className="text-xs text-muted-foreground">Format: 03XX-XXXXXXX or +923XXXXXXXXX</p>}
                 </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label htmlFor="line1">Street Address *</Label>
-                  <Input id="line1" required placeholder="House no., street, area" value={shipping_data.line1}
-                    onChange={(e) => setShippingData((d) => ({ ...d, line1: e.target.value }))} />
+                  <Input
+                    id="line1" required maxLength={100}
+                    placeholder="House no., street, area"
+                    value={shipping_data.line1}
+                    className={cn(fieldErrors.line1 && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, line1: e.target.value }));
+                      if (fieldErrors.line1) setFieldErrors((f) => ({ ...f, line1: undefined }));
+                    }}
+                  />
+                  {fieldErrors.line1 && <p className="text-xs text-destructive">{fieldErrors.line1}</p>}
                 </div>
                 <div className="sm:col-span-2 space-y-1.5">
                   <Label htmlFor="line2">Address Line 2</Label>
-                  <Input id="line2" placeholder="Apartment, block, floor (optional)" value={shipping_data.line2}
+                  <Input id="line2" maxLength={100} placeholder="Apartment, block, floor (optional)" value={shipping_data.line2}
                     onChange={(e) => setShippingData((d) => ({ ...d, line2: e.target.value }))} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="city">City *</Label>
-                  <Input id="city" required placeholder="e.g. Karachi" value={shipping_data.city}
-                    onChange={(e) => setShippingData((d) => ({ ...d, city: e.target.value }))} />
+                  <Input
+                    id="city" required maxLength={50}
+                    placeholder="e.g. Karachi"
+                    value={shipping_data.city}
+                    className={cn(fieldErrors.city && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, city: e.target.value }));
+                      if (fieldErrors.city) setFieldErrors((f) => ({ ...f, city: undefined }));
+                    }}
+                  />
+                  {fieldErrors.city && <p className="text-xs text-destructive">{fieldErrors.city}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="state">Province *</Label>
-                  <select id="state" required value={shipping_data.state}
-                    onChange={(e) => setShippingData((d) => ({ ...d, state: e.target.value }))}
-                    className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+                  <select
+                    id="state" required
+                    value={shipping_data.state}
+                    onChange={(e) => {
+                      setShippingData((d) => ({ ...d, state: e.target.value }));
+                      if (fieldErrors.state) setFieldErrors((f) => ({ ...f, state: undefined }));
+                    }}
+                    className={cn(
+                      "w-full h-10 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring",
+                      fieldErrors.state ? "border-destructive focus:ring-destructive" : "border-input"
+                    )}
+                  >
                     <option value="">Select province…</option>
                     {["Punjab","Sindh","Khyber Pakhtunkhwa","Balochistan","Islamabad Capital Territory","Gilgit-Baltistan","Azad Kashmir"].map((p) => (
                       <option key={p} value={p}>{p}</option>
                     ))}
                   </select>
+                  {fieldErrors.state && <p className="text-xs text-destructive">{fieldErrors.state}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="postalCode">Postal Code</Label>
-                  <Input id="postalCode" placeholder="e.g. 75500" value={shipping_data.postalCode}
-                    onChange={(e) => setShippingData((d) => ({ ...d, postalCode: e.target.value }))} />
+                  <Label htmlFor="postalCode">Postal Code <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                  <Input
+                    id="postalCode" maxLength={5}
+                    placeholder="e.g. 75500"
+                    value={shipping_data.postalCode}
+                    className={cn(fieldErrors.postalCode && "border-destructive focus-visible:ring-destructive")}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, "").slice(0, 5);
+                      setShippingData((d) => ({ ...d, postalCode: val }));
+                      if (fieldErrors.postalCode) setFieldErrors((f) => ({ ...f, postalCode: undefined }));
+                    }}
+                  />
+                  {fieldErrors.postalCode && <p className="text-xs text-destructive">{fieldErrors.postalCode}</p>}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="country">Country</Label>
