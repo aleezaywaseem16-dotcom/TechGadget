@@ -42,10 +42,19 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "static.garmin.com" },
       // SteelSeries
       { protocol: "https", hostname: "media.steelseries.com" },
-      // Anker
-      { protocol: "https", hostname: "dimg.anker.com" },
+      // Anker (wildcard covers all subdomains)
+      { protocol: "https", hostname: "*.anker.com" },
+      { protocol: "https", hostname: "anker.com" },
       // DJI
       { protocol: "https", hostname: "store-cdn.dji.com" },
+      { protocol: "https", hostname: "*.dji.com" },
+      // Generic CDNs that brands often use
+      { protocol: "https", hostname: "*.cdninstagram.com" },
+      { protocol: "https", hostname: "*.shopify.com" },
+      { protocol: "https", hostname: "cdn.shopify.com" },
+      { protocol: "https", hostname: "*.akamaized.net" },
+      { protocol: "https", hostname: "*.cloudfront.net" },
+      { protocol: "https", hostname: "m.media-amazon.com" },
     ],
   },
 };

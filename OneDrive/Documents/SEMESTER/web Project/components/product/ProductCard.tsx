@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "./StarRating";
 import { AddToCartButton } from "./AddToCartButton";
 import { WishlistButton } from "./WishlistButton";
+import { ProductCardImage } from "./ProductCardImage";
 import { formatPrice, calcDiscount } from "@/lib/utils";
 import type { Product } from "@/types";
 
@@ -15,12 +15,11 @@ interface ProductCardProps {
   };
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const image =
-    product.images?.sort((a, b) => a.position - b.position)[0]?.url ??
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop";
+const FALLBACK = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop";
 
-  const alt = product.images?.[0]?.alt ?? product.name;
+export function ProductCard({ product }: ProductCardProps) {
+  const sortedImages = product.images?.sort((a, b) => a.position - b.position) ?? [];
+  const firstImage = sortedImages[0]?.url ?? FALLBACK;
   const discount = calcDiscount(product.compare_at_price ?? 0, product.price);
   const inStock = product.stock_quantity > 0;
 
@@ -28,12 +27,10 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="group relative rounded-2xl border bg-card overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       {/* Image area */}
       <Link href={`/product/${product.slug}`} className="block relative aspect-square bg-muted overflow-hidden">
-        <Image
-          src={image}
-          alt={alt}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        <ProductCardImage
+          images={sortedImages}
+          productName={product.name}
+          fallback={FALLBACK}
         />
 
         {/* Overlay gradient on hover */}
@@ -59,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Quick Add — bottom right, hover only on desktop */}
         <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:block">
-          <AddToCartButton product={product} image={image} variant="icon" />
+          <AddToCartButton product={product} image={firstImage} variant="icon" />
         </div>
       </Link>
 
@@ -94,7 +91,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
           {/* Always-visible Add to Cart on mobile */}
           <div className="sm:hidden">
-            <AddToCartButton product={product} image={image} variant="icon" />
+            <AddToCartButton product={product} image={firstImage} variant="icon" />
           </div>
         </div>
       </div>
