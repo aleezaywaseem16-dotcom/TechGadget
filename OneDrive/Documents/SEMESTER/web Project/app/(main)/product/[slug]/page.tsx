@@ -7,6 +7,7 @@ import { AddToCartButton } from "@/components/product/AddToCartButton";
 import { WishlistButton } from "@/components/product/WishlistButton";
 import { StarRating } from "@/components/product/StarRating";
 import { ReviewList } from "@/components/product/ReviewList";
+import { ReviewForm } from "@/components/product/ReviewForm";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -43,6 +44,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .sort((a, b) => a.position - b.position);
 
   const primaryImage = images[0]?.url ?? "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=600&fit=crop";
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   // Load reviews and related products in parallel
   const [reviewRes, relatedRes] = await Promise.all([
@@ -200,6 +203,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
           )}
         </div>
         <ReviewList reviews={reviews} />
+
+        <div className="mt-8">
+          <ReviewForm
+            productId={product.id}
+            productSlug={product.slug}
+            isLoggedIn={!!user}
+          />
+        </div>
       </section>
 
       {/* Related products */}
