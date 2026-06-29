@@ -76,7 +76,11 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
 
         <div className="flex items-center gap-1 mb-3">
-          <StarRating rating={product.rating_avg} count={product.rating_count} />
+          {product.rating_count > 0 ? (
+            <StarRating rating={product.rating_avg} count={product.rating_count} />
+          ) : (
+            <span className="text-xs text-muted-foreground">No reviews yet</span>
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2">

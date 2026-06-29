@@ -101,7 +101,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h1 className="text-2xl md:text-3xl font-bold mb-3 leading-tight">{product.name}</h1>
 
           <div className="flex items-center gap-4 mb-4">
-            <StarRating rating={product.rating_avg} count={product.rating_count} size="md" />
+            {product.rating_count > 0 ? (
+              <StarRating rating={product.rating_avg} count={product.rating_count} size="md" />
+            ) : (
+              <span className="text-sm text-muted-foreground">No reviews yet</span>
+            )}
             <Separator orientation="vertical" className="h-4" />
             <span className={`text-sm font-medium ${inStock ? "text-emerald-600" : "text-rose-600"}`}>
               {inStock ? `${product.stock_quantity} in stock` : "Out of Stock"}
@@ -188,10 +192,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h2 className="text-xl font-bold">
             Customer Reviews{reviews.length > 0 ? ` (${reviews.length})` : ""}
           </h2>
-          <div className="flex items-center gap-2">
-            <StarRating rating={product.rating_avg} size="md" />
-            <span className="font-semibold">{product.rating_avg.toFixed(1)}</span>
-          </div>
+          {reviews.length > 0 && (
+            <div className="flex items-center gap-2">
+              <StarRating rating={product.rating_avg} size="md" />
+              <span className="font-semibold">{product.rating_avg.toFixed(1)}</span>
+            </div>
+          )}
         </div>
         <ReviewList reviews={reviews} />
       </section>
