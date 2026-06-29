@@ -79,7 +79,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   switch (params.sort) {
     case "price-asc":  query = query.order("price", { ascending: true }); break;
     case "price-desc": query = query.order("price", { ascending: false }); break;
-    case "rating":     query = query.order("rating_avg", { ascending: false }); break;
+    case "rating":     query = query.order("rating_count", { ascending: false }).order("rating_avg", { ascending: false }); break;
     default:           query = query.order("created_at", { ascending: false });
   }
 
