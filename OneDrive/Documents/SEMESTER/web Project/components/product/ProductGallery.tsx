@@ -10,13 +10,19 @@ interface ProductGalleryProps {
   productName: string;
 }
 
+const FALLBACK = "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=600&fit=crop";
+
 export function ProductGallery({ images, productName }: ProductGalleryProps) {
   const allImages = images.length > 0
     ? images
-    : [{ url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&h=600&fit=crop", alt: productName }];
+    : [{ url: FALLBACK, alt: productName }];
 
   const [active, setActive]       = useState(0);
   const [lightbox, setLightbox]   = useState(false);
+  const [imgErrors, setImgErrors] = useState<boolean[]>(() => new Array(allImages.length).fill(false));
+
+  const getSrc = (i: number) => imgErrors[i] ? FALLBACK : allImages[i].url;
+  const markError = (i: number) => setImgErrors((prev) => { const next = [...prev]; next[i] = true; return next; });
 
   const prev = useCallback(() => setActive((i) => (i - 1 + allImages.length) % allImages.length), [allImages.length]);
   const next = useCallback(() => setActive((i) => (i + 1) % allImages.length), [allImages.length]);
@@ -43,12 +49,13 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         {/* Main image */}
         <div className="relative w-full aspect-square max-h-[460px] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden group border border-border">
           <Image
-            src={allImages[active].url}
+            src={getSrc(active)}
             alt={allImages[active].alt ?? productName}
             fill
             className="object-contain p-6"
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
+            onError={() => markError(active)}
           />
 
           {/* Fullscreen button */}
@@ -102,11 +109,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 )}
               >
                 <Image
-                  src={img.url}
+                  src={getSrc(i)}
                   alt={img.alt ?? productName}
                   width={64}
                   height={64}
                   className="object-cover w-full h-full"
+                  onError={() => markError(i)}
                 />
               </button>
             ))}
@@ -150,11 +158,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <Image
-              src={allImages[active].url}
+              src={getSrc(active)}
               alt={allImages[active].alt ?? productName}
               fill
               className="object-contain"
               sizes="90vw"
+              onError={() => markError(active)}
             />
           </div>
 
@@ -185,11 +194,12 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                   )}
                 >
                   <Image
-                    src={img.url}
+                    src={getSrc(i)}
                     alt={img.alt ?? productName}
                     width={48}
                     height={48}
                     className="object-cover w-full h-full"
+                    onError={() => markError(i)}
                   />
                 </button>
               ))}

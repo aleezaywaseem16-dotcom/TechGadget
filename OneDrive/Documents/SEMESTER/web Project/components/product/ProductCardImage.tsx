@@ -15,7 +15,10 @@ export function ProductCardImage({ images, productName, fallback }: ProductCardI
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [fading, setFading]       = useState(false);
+  const [imgError, setImgError]   = useState(false);
   const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const currentSrc = imgError ? fallback : (allImages[activeIdx].url);
 
   const startSlideshow = () => {
     if (!hasMultiple) return;
@@ -47,13 +50,14 @@ export function ProductCardImage({ images, productName, fallback }: ProductCardI
       onMouseLeave={stopSlideshow}
     >
       <Image
-        src={allImages[activeIdx].url}
+        src={currentSrc}
         alt={allImages[activeIdx].alt ?? productName}
         fill
         className={`object-cover transition-all duration-150 ${
           fading ? "opacity-0 scale-100" : hasMultiple ? "opacity-100 scale-100" : "opacity-100 group-hover:scale-105 duration-500"
         }`}
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+        onError={() => setImgError(true)}
       />
 
       {/* Dot indicators — only when multiple images */}

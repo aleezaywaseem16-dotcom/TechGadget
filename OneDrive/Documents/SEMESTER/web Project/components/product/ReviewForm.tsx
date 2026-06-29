@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Star, Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ interface ReviewFormProps {
 }
 
 export function ReviewForm({ productId, productSlug, isLoggedIn }: ReviewFormProps) {
+  const router = useRouter();
   const [rating, setRating]       = useState(0);
   const [hovered, setHovered]     = useState(0);
   const [title, setTitle]         = useState("");
@@ -55,6 +57,7 @@ export function ReviewForm({ productId, productSlug, isLoggedIn }: ReviewFormPro
       if (result.error) { toast.error(result.error); return; }
       toast.success(result.success);
       setSubmitted(true);
+      router.refresh(); // re-fetch page data so the new review appears immediately
     });
   };
 
