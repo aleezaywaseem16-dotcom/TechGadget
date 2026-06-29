@@ -10,64 +10,80 @@ interface ProductCardImageProps {
 }
 
 export function ProductCardImage({ images, productName, fallback }: ProductCardImageProps) {
-  const allImages = images.length > 0 ? images : [{ url: fallback, alt: productName }];
-  const hasMultiple = allImages.length > 1;
+  const all = images.length > 0 ? images : [{ url: fallback, alt: productName }];
+  const multi = all.length > 1;
 
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [fading, setFading]       = useState(false);
-  const [imgError, setImgError]   = useState(false);
-  const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [idx, setIdx]       = useState(0);
+  const [fade, setFade]     = useState(false);
+  const [hover, setHover]   = useState(false);
+  const [err, setErr]       = useState(false);
+  const slideTimer  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const currentSrc = imgError ? fallback : (allImages[activeIdx].url);
+  function clearAll() {
+    if (slideTimer.current)  { clearInterval(slideTimer.current);   slideTimer.current  = null; }
+    if (fadeTimeout.current) { clearTimeout(fadeTimeout.current);   fadeTimeout.current = null; }
+  }
 
-  const startSlideshow = () => {
-    if (!hasMultiple) return;
-    intervalRef.current = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setActiveIdx((i) => (i + 1) % allImages.length);
-        setFading(false);
-      }, 150);
-    }, 700);
-  };
+  function goTo(next: number) {
+    // cancel any in-progress fade before starting a new one
+    if (fadeTimeout.current) { clearTimeout(fadeTimeout.current); fadeTimeout.current = null; }
+    setFade(true);
+    fadeTimeout.current = setTimeout(() => {
+      setIdx(next);
+      setFade(false);
+      fadeTimeout.current = null;
+    }, 180);
+  }
 
-  const stopSlideshow = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = null;
-    setFading(true);
-    setTimeout(() => {
-      setActiveIdx(0);
-      setFading(false);
-    }, 150);
-  };
+  function enter() {
+    clearAll();
+    setHover(true);
+    setFade(false); // ensure visible immediately on re-enter
+    if (!multi) return;
+    let n = 0;
+    slideTimer.current = setInterval(() => {
+      n = (n + 1) % all.length;
+      goTo(n);
+    }, 900);
+  }
 
-  useEffect(() => () => { if (intervalRef.current) clearInterval(intervalRef.current); }, []);
+  function leave() {
+    clearAll();
+    setHover(false);
+    goTo(0); // fade back to first image
+  }
+
+  useEffect(() => () => clearAll(), []);
 
   return (
     <div
-      className="relative w-full h-full"
-      onMouseEnter={startSlideshow}
-      onMouseLeave={stopSlideshow}
+      className="relative w-full h-full overflow-hidden"
+      onMouseEnter={enter}
+      onMouseLeave={leave}
     >
       <Image
-        src={currentSrc}
-        alt={allImages[activeIdx].alt ?? productName}
+        src={err ? fallback : all[idx].url}
+        alt={all[idx].alt ?? productName}
         fill
-        className={`object-cover transition-all duration-150 ${
-          fading ? "opacity-0 scale-100" : hasMultiple ? "opacity-100 scale-100" : "opacity-100 group-hover:scale-105 duration-500"
-        }`}
+        className={[
+          "object-cover",
+          "transition-all duration-200 ease-in-out",
+          fade              ? "opacity-0"   : "opacity-100",
+          !multi && hover   ? "scale-110"   : "scale-100",
+        ].join(" ")}
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-        onError={() => setImgError(true)}
+        onError={() => setErr(true)}
       />
 
-      {/* Dot indicators — only when multiple images */}
-      {hasMultiple && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          {allImages.map((_, i) => (
+      {/* Dot indicators — visible while hovering multi-image products */}
+      {multi && hover && (
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+          {all.map((_, i) => (
             <span
               key={i}
-              className={`block rounded-full transition-all duration-200 ${
-                i === activeIdx ? "w-3 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/60"
+              className={`block rounded-full transition-all duration-200 shadow ${
+                i === idx ? "w-3 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/60"
               }`}
             />
           ))}
